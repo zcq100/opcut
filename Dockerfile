@@ -12,13 +12,14 @@ RUN /opt/opcut/bin/pip install --no-cache-dir -r requirements.pip.txt && \
     patch -p1 < node_modules.patch
 COPY . .
 RUN /opt/opcut/bin/doit clean_all && \
-    /opt/opcut/bin/doit
+    /opt/opcut/bin/doit && \
+    /opt/opcut/bin/pip wheel -w /opcut/wheels /opcut/build/py/*.whl
 
 FROM opcut-base AS opcut-run
 WORKDIR /opcut
-COPY --from=opcut-build /root/.cache/pip /root/.cache/pip
+COPY --from=opcut-build /opcut/wheels /opcut/wheels
 COPY --from=opcut-build /opcut/build/py/*.whl .
-RUN /opt/opcut/bin/pip install --no-cache-dir *.whl && \
-    rm -rf /opcut /root/.cache/pip /root/.cache
+RUN /opt/opcut/bin/pip install --no-cache-dir --no-index --find-links /opcut/wheels *.whl && \
+    rm -rf /opcut /opcut/wheels /root/.cache
 EXPOSE 8080
 CMD ["/opt/opcut/bin/opcut", "server"]
