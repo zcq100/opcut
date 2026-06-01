@@ -7,6 +7,8 @@
 opcut
 =====
 
+`中文文档 <README.md>`_
+
 `<https://opcut.kopic.xyz/>`_
 
 `opcut` is `cutting stock problem`_ optimizer utilizing multiple
