@@ -135,7 +135,7 @@ class CBuild:
         """Create a task that links a shared library."""
         obj_paths = [self._get_obj_path(src_path)
                      for src_path in self._src_paths]
-        return {'name': str(lib_path),
+        yield {'name': str(lib_path),
                 'actions': [(common.mkdir_p, [lib_path.parent]),
                             [get_cc(self._platform),
                              *get_ld_flags(self._platform, True),
