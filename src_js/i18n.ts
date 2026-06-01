@@ -14,6 +14,7 @@ const en = {
     item: 'Item',
     settings: 'Settings',
     source_code: 'Source code',
+    source_code_url: 'https://github.com/bozokopic/opcut',
     method: 'Method',
     cut_width: 'Cut width',
     minimize_initial_panel_usage: 'Minimize initial panel usage',
@@ -48,6 +49,56 @@ const en = {
 } as const;
 
 
+const zh = {
+    server_error: '服务器错误',
+    invalid_cut_width: '无效的切割宽度',
+    invalid_panel_name: '无效的板材名称',
+    invalid_item_name: '无效的零件名称',
+    invalid_quantity: '无效的数量',
+    invalid_height: '无效的高度',
+    invalid_width: '无效的宽度',
+    duplicate_name: '名称重复',
+    no_panels_defined: '未定义板材',
+    no_items_defined: '未定义零件',
+    panel: '板材',
+    item: '零件',
+    settings: '设置',
+    source_code: '源代码',
+    source_code_url: 'https://github.com/zcq100/opcut',
+    method: '算法',
+    cut_width: '切割宽度',
+    minimize_initial_panel_usage: '最小化初始板材使用',
+    calculate: '计算',
+    quantity: '数量',
+    height: '高度',
+    width: '宽度',
+    panel_name: '板材名称',
+    item_name: '零件名称',
+    rotate: '旋转',
+    add_panel: '添加板材',
+    add_item: '添加零件',
+    csv_import: 'CSV 导入',
+    csv_export: 'CSV 导出',
+    export: '导出',
+    font_size: '字体大小',
+    small: '小',
+    medium: '中',
+    large: '大',
+    show_names: '显示名称',
+    show_dimensions: '显示尺寸',
+    cut_area: '切割区域',
+    version: '版本',
+    language: '语言',
+    result_colors: '结果颜色',
+    cut: '已切割',
+    selected: '已选中',
+    unused: '未使用',
+    default_panel_values: '默认板材参数',
+    default_item_values: '默认零件参数',
+    name: '名称'
+} as const;
+
+
 const hr = {
     server_error: 'Pogreška poslužitelja',
     invalid_cut_width: 'Pogrešna širina reza',
@@ -63,6 +114,7 @@ const hr = {
     item: 'Element',
     settings: 'Postavke',
     source_code: 'Izvorni kod',
+    source_code_url: 'https://github.com/bozokopic/opcut',
     method: 'Metoda',
     cut_width: 'Širina reza',
     minimize_initial_panel_usage: 'Optimiraj upotrebu početnih ploca',
@@ -99,19 +151,22 @@ const hr = {
 
 export const langs = {
     en: 'English',
-    hr: 'Hrvatski'
+    hr: 'Hrvatski',
+    zh: '中文'
 } as const;
 
 export type Lang = keyof (typeof langs);
 
 export type Labels = (
     keyof (typeof en) |
-    keyof (typeof hr)
+    keyof (typeof hr) |
+    keyof (typeof zh)
 );
 
 export type Dict = Record<Labels, string>;
 
 export const dicts: Record<Lang, Dict> = {
     en,
-    hr
+    hr,
+    zh
 } as const;

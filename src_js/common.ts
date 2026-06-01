@@ -134,7 +134,7 @@ let itemCounter = 0;
 
 
 const defaultSettings: Settings = {
-    lang: 'en',
+    lang: 'zh',
     colors: {
         cut: '#646464',
         item: '#fafafa',
