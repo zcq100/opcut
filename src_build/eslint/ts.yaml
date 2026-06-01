@@ -1,0 +1,37 @@
+parserOptions:
+    sourceType: module
+    ecmaVersion: latest
+plugins:
+    - '@typescript-eslint'
+extends:
+    - 'eslint:recommended'
+    - 'plugin:@typescript-eslint/recommended'
+env:
+    browser: true
+    node: true
+    commonjs: true
+    es6: true
+rules:
+    indent:
+        - error
+        - 4
+        - ArrayExpression: off
+          SwitchCase: 1
+          CallExpression:
+            arguments: first
+    no-constant-condition:
+        - error
+        - checkLoops: false
+    semi:
+        - error
+        - always
+    linebreak-style:
+        - error
+        - unix
+    '@typescript-eslint/no-unused-vars':
+        - error
+        - argsIgnorePattern: ^_$
+    '@typescript-eslint/no-explicit-any':
+        - 'off'
+    '@typescript-eslint/ban-ts-comment':
+        - 'off'

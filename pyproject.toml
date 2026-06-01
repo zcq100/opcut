@@ -20,11 +20,11 @@ Homepage = "https://opcut.kopic.xyz"
 Repository = "https://github.com/bozokopic/opcut.git"
 
 [project.optional-dependencies]
-dev = ["hat-doit ~=0.16.2"]
+dev = ["doit ~=0.37"]
 
 [build-system]
-requires = ["hat-doit ~=0.16.2"]
-build-backend = "hat.doit.pep517"
+requires = ["doit", "mkwhl", "packaging", "watchdog"]
+build-backend = "src_build.pep517"
 
 [tool.hat-doit]
 build_wheel_task = "wheel"

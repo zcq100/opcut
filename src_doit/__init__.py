@@ -4,13 +4,13 @@ from .libopcut import *  # NOQA
 from pathlib import Path
 import subprocess
 
-from hat.doit import common
-from hat.doit.js import (ESLintConf,
-                         run_eslint)
-from hat.doit.py import (get_task_build_wheel,
-                         get_task_create_pip_requirements,
-                         run_flake8)
-from hat.doit.c import get_task_clang_format
+from src_build import common
+from src_build.js import (ESLintConf,
+                          run_eslint)
+from src_build.py import (get_task_build_wheel,
+                          get_task_create_pip_requirements,
+                          run_flake8)
+from src_build.c import get_task_clang_format
 
 from . import dist
 from . import libopcut

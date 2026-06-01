@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess
 import zipfile
 
-from hat.doit import common
+from src_build import common
 
 
 __all__ = ['task_dist']

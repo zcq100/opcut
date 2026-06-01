@@ -1,0 +1,29 @@
+parserOptions:
+    sourceType: module
+    ecmaVersion: latest
+extends: 'eslint:recommended'
+env:
+    browser: true
+    node: true
+    commonjs: true
+    es6: true
+rules:
+    indent:
+        - error
+        - 4
+        - ArrayExpression: off
+          SwitchCase: 1
+          CallExpression:
+            arguments: first
+    no-unused-vars:
+        - error
+        - argsIgnorePattern: ^_$
+    no-constant-condition:
+        - error
+        - checkLoops: false
+    semi:
+        - error
+        - always
+    linebreak-style:
+        - error
+        - unix
