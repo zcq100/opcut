@@ -1,0 +1,8 @@
+.doit.db
+.git
+build
+cache
+node_modules
+playground
+*.pyc
+__pycache__
