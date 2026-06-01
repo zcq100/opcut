@@ -1,0 +1,198 @@
+"""Python build support (replaces hat.doit.py)."""
+
+from collections.abc import Iterable
+from pathlib import Path
+import collections
+import json
+import subprocess
+import sys
+import tempfile
+
+import mkwhl
+
+from . import common
+
+
+def get_task_build_wheel(src_dir: Path,
+                         build_dir: Path,
+                         *,
+                         file_dep=[],
+                         task_dep=[],
+                         **kwargs
+                         ) -> dict:
+    """Create a task that builds a Python wheel."""
+
+    def action(whl_dir, whl_name_path, editable):
+        build_wheel(src_dir=src_dir,
+                    build_dir=whl_dir or build_dir,
+                    whl_name_path=whl_name_path,
+                    editable=editable,
+                    **kwargs)
+
+    return {'actions': [action],
+            'params': [{'name': 'whl_dir',
+                        'long': 'whl-dir',
+                        'type': Path,
+                        'default': None},
+                       {'name': 'whl_name_path',
+                        'long': 'whl-name-path',
+                        'type': Path,
+                        'default': None},
+                       {'name': 'editable',
+                        'long': 'editable',
+                        'type': bool,
+                        'default': False}],
+            'file_dep': file_dep,
+            'task_dep': task_dep}
+
+
+def get_task_create_pip_requirements(dst_path: Path = Path('requirements.pip.txt'),  # NOQA
+                                     *,
+                                     freeze: bool = False,
+                                     src_path: Path = Path('pyproject.toml'),
+                                     file_dep=[],
+                                     task_dep=[],
+                                     **kwargs
+                                     ) -> dict:
+    """Create a task that generates a pip requirements file."""
+
+    def action():
+        create_pip_requirements(dst_path,
+                                freeze=freeze,
+                                src_path=src_path,
+                                **kwargs)
+
+    return {'actions': [action],
+            'file_dep': [src_path, *file_dep],
+            'task_dep': task_dep,
+            'targets': [dst_path],
+            **({'uptodate': [False]} if freeze else {})}
+
+
+def build_wheel(src_dir: Path,
+                build_dir: Path,
+                *,
+                whl_name_path: Path | None = None,
+                py_versions: Iterable[common.PyVersion] = common.PyVersion,
+                py_limited_api: common.PyVersion | None = None,
+                platform: common.Platform | None = None,
+                is_purelib: bool = True,
+                **kwargs):
+    """Build a Python wheel using mkwhl."""
+    python_tag = _get_python_tag(py_versions)
+    abi_tag = _get_abi_tag(is_purelib, py_limited_api, py_versions)
+    platform_tag = _get_platform_tag(platform)
+
+    whl_name = mkwhl.create_wheel(src_dir=src_dir,
+                                  build_dir=build_dir,
+                                  python_tag=python_tag,
+                                  abi_tag=abi_tag,
+                                  platform_tag=platform_tag,
+                                  is_purelib=is_purelib,
+                                  **kwargs)
+
+    if whl_name_path is not None:
+        whl_name_path.write_text(whl_name)
+
+
+def run_flake8(path: Path):
+    """Run flake8 linter on a path."""
+    subprocess.run([sys.executable, '-m', 'flake8', str(path)],
+                   check=True)
+
+
+def create_pip_requirements(dst_path: Path,
+                            *,
+                            freeze: bool = False,
+                            extras: list[str] | None = None,
+                            groups: list[str] | None = None,
+                            src_path: Path = Path('pyproject.toml')):
+    """Create a pip requirements file from pyproject.toml."""
+    conf = common.get_conf(src_path)
+    project_conf = conf.get('project', {})
+    dependency_groups_conf = conf.get('dependency-groups', {})
+
+    dependencies = collections.deque(project_conf.get('dependencies', []))
+    for k, v in project_conf.get('optional-dependencies', {}).items():
+        if extras is None or k in extras:
+            dependencies.extend(v)
+
+    for group in dependency_groups_conf.keys():
+        if groups is None or group in groups:
+            try:
+                import dependency_groups
+                dependencies.extend(
+                    dependency_groups.resolve(dependency_groups_conf, group))
+            except ImportError:
+                pass
+
+    if freeze:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            requirements_path = Path(tmp_dir) / 'requirements.txt'
+            report_path = Path(tmp_dir) / 'report.json'
+
+            requirements_path.write_text(
+                ''.join(f"{i}\n" for i in dependencies))
+
+            subprocess.run([sys.executable, '-m', 'pip', '--quiet',
+                            'install', '--dry-run', '--ignore-installed',
+                            '--quiet', '--report', str(report_path),
+                            '-r', str(requirements_path)],
+                           check=True)
+
+            report = json.loads(report_path.read_text())
+
+        dependencies = [f"{i['metadata']['name']}=={i['metadata']['version']}"
+                        for i in report.get('install', [])]
+
+    dependencies = sorted(set(dependencies))
+    dst_path.write_text(''.join(f"{i}\n" for i in dependencies))
+
+
+def _get_python_tag(py_versions):
+    """Generate a Python version tag for the wheel."""
+    return '.'.join(''.join(str(i) for i in py_version.value)
+                    for py_version in py_versions)
+
+
+def _get_abi_tag(is_purelib, py_limited_api, py_versions):
+    """Generate an ABI tag for the wheel."""
+    if is_purelib:
+        return 'none'
+
+    if py_limited_api:
+        return 'abi3'
+
+    return _get_python_tag(py_versions)
+
+
+def _get_platform_tag(platform):
+    """Generate a platform tag for the wheel."""
+    if not platform:
+        return 'any'
+
+    if platform == common.Platform.WINDOWS_AMD64:
+        return 'win_amd64'
+
+    if platform == common.Platform.DARWIN_X86_64:
+        return 'macosx_10_13_x86_64'
+
+    if platform == common.Platform.LINUX_GNU_X86_64:
+        return 'manylinux_2_24_x86_64'
+
+    if platform == common.Platform.LINUX_GNU_AARCH64:
+        return 'manylinux_2_24_aarch64'
+
+    if platform == common.Platform.LINUX_GNU_ARMV7L:
+        return 'manylinux_2_24_armv7l'
+
+    if platform == common.Platform.LINUX_MUSL_X86_64:
+        return 'musllinux_1_2_x86_64'
+
+    if platform == common.Platform.LINUX_MUSL_AARCH64:
+        return 'musllinux_1_2_aarch64'
+
+    if platform == common.Platform.LINUX_MUSL_ARMV7L:
+        return 'musllinux_1_2_armv7l'
+
+    raise NotImplementedError()

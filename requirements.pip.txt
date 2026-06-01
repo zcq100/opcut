@@ -1,5 +1,8 @@
 aiohttp ~=3.10.11
 hat-aio ~=0.7.12
-hat-doit ~=0.16.2
 hat-json ~=0.6.2
 pycairo ~=1.27.0
+doit ~=0.37
+mkwhl ~=0.3.2
+packaging ~=26.0
+watchdog ~=6.0

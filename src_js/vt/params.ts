@@ -23,7 +23,7 @@ export function main(): u.VNodeChild {
             ['button', {
                 on: {
                     click: () => window.open(
-                        'https://github.com/bozokopic/opcut',
+                        dict.source_code_url,
                         '_blank'
                     )
                 }},

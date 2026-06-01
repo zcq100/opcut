@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from hat.doit import common
-from hat.doit.c import (get_lib_suffix,
-                        CBuild)
+from src_build import common
+from src_build.c import (get_lib_suffix,
+                         CBuild)
 
 
 __all__ = ['task_libopcut',
